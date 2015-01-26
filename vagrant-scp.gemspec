@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Vagrant::Scp::VERSION
   spec.authors       = ["Luca Invernizzi"]
   spec.email         = ["invernizzi.l@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.description   = 'Copy files to a Vagrant VM via SCP.'
+  spec.summary       = 'Copy files to a Vagrant VM via SCP.'
+  spec.homepage      = "https://github.com/invernizzi/vagrant-scp"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
