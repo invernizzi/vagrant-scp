@@ -22,6 +22,8 @@ module VagrantPlugins
             command = [
               "scp",
               '-r',
+              '-o StrictHostKeyChecking=no',
+              '-o UserKnownHostsFile=/dev/null',
               "-o port=#{ssh_info[:port]}",
               "-i '#{ssh_info[:private_key_path][0]}'",
                 source_files,
