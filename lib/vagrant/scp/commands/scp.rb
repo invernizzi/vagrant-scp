@@ -11,6 +11,7 @@ module VagrantPlugins
         def execute
           # Parse the arguments
           file_1, file_2 = parse_args()
+          return if file_2.nil?
           # Extract host info
           #
           # We want to get the name of the vm, from a [host_1]:file_1 [host_2]:file_2 description
@@ -51,8 +52,9 @@ module VagrantPlugins
             o.separator ""
           end
           argv = parse_options(opts)
-          @env.ui.info(opts.help, prefix: false) unless argv.length == 2
-          return argv
+          return argv if argv and  argv.length == 2
+          @env.ui.info(opts.help, prefix: false) if argv
+          return nil, nil
         end
 
       end
