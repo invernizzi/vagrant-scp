@@ -46,7 +46,8 @@ module VagrantPlugins
 
         def parse_args
           opts = OptionParser.new do |o|
-            o.banner = "Usage: vagrant scp <files> <target> [vm_name]"
+            o.banner = "Usage: vagrant scp <some_local_file_or_dir> <vm_name:somewhere_on_the_vm>"
+            o.banner = "       vagrant scp <vm_name:somewhere_on_the_vm> <some_local_file_or_dir>"
             o.separator ""
             o.separator "Options:"
             o.separator ""
