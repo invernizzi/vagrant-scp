@@ -23,3 +23,6 @@ Copying files out of the VM works in the same fashion
     vagrant scp <vm_name:somewhere_on_the_vm> <some_local_file_or_dir>
 
 That’s it!
+
+## Vagrant version
+We support Vagrant 1.7+. Note that Ubuntu 14.04 LTS ships version 1.4.3. You can get the deb file with the latest Vagrant [here](https://www.vagrantup.com/downloads.html).
