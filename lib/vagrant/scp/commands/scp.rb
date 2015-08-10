@@ -13,9 +13,10 @@ module VagrantPlugins
           file_1, file_2 = parse_args()
           return if file_2.nil?
           # Extract host info
-          #
           # We want to get the name of the vm, from a [host_1]:file_1 [host_2]:file_2 description
           host = [file_1, file_2].map{|file_spec| file_spec.match(/^([^:]*):/)[1] rescue nil}.compact.first
+          # The default machine name for Vagrant is 'default'
+          host = 'default' if host.empty?
 
           # Get the info about the target VM
           with_target_vms(host) do |machine|
@@ -46,8 +47,8 @@ module VagrantPlugins
 
         def parse_args
           opts = OptionParser.new do |o|
-            o.banner = "Usage: vagrant scp <some_local_file_or_dir> <vm_name:somewhere_on_the_vm>"
-            o.banner = "       vagrant scp <vm_name:somewhere_on_the_vm> <some_local_file_or_dir>"
+            o.banner = "Usage: vagrant scp <local_path> [vm_name]:<remote_path> \n"
+            o.banner += "       vagrant scp [vm_name]:<remote_path> <local_path>"
             o.separator ""
             o.separator "Options:"
             o.separator ""
