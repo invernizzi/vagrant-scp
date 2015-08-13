@@ -16,7 +16,7 @@ module VagrantPlugins
           # We want to get the name of the vm, from a [host_1]:file_1 [host_2]:file_2 description
           host = [file_1, file_2].map{|file_spec| file_spec.match(/^([^:]*):/)[1] rescue nil}.compact.first
           # The default machine name for Vagrant is 'default'
-          host = 'default' if host.empty?
+          host = 'default' if (host.nil? || host == 0 )
 
           # Get the info about the target VM
           with_target_vms(host) do |machine|
