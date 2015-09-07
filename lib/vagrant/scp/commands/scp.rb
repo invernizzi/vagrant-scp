@@ -1,3 +1,5 @@
+require 'net/scp'
+
 module VagrantPlugins
   module Scp
     module Command
@@ -23,25 +25,23 @@ module VagrantPlugins
             ssh_info = machine.ssh_info
             raise Vagrant::Errors::SSHNotReady if ssh_info.nil?
             if file_1.include? ':'
-              source_files = "#{ssh_info[:username]}@#{ssh_info[:host]}:#{file_1.split(':').last}"
+              source_files = file_1.split(':').last
               target_files = file_2
+              net_ssh_command = :download!
             else
               source_files = file_1
-              target_files = "#{ssh_info[:username]}@#{ssh_info[:host]}:#{file_2.split(':').last}"
+              target_files = file_2.split(':').last
+              net_ssh_command = :upload!
             end
 
             # Run the SCP
-            command = [
-              "scp",
-              '-r',
-              '-o StrictHostKeyChecking=no',
-              '-o UserKnownHostsFile=/dev/null',
-              "-o port=#{ssh_info[:port]}",
-              "-i '#{ssh_info[:private_key_path][0]}'",
-                source_files,
-                target_files
-            ].join(' ')
-            system(command)
+            Net::SCP.send net_ssh_command,
+                          ssh_info[:host],
+                          ssh_info[:username],
+                          source_files,
+                          target_files,
+                          :recursive => true,
+                          :ssh => {:port => ssh_info[:port], :keys => ssh_info[:private_key_path]}
           end
         end
 
