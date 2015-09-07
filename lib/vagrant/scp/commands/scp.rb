@@ -15,16 +15,16 @@ module VagrantPlugins
           return if @file_2.nil?
 
           with_target_vms(host) do |machine|
-            ssh_info = machine.ssh_info
-            raise Vagrant::Errors::SSHNotReady if ssh_info.nil?
+            @ssh_info = machine.ssh_info
+            raise Vagrant::Errors::SSHNotReady if @ssh_info.nil?
 
             Net::SCP.send net_ssh_command,
-                          ssh_info[:host],
-                          ssh_info[:username],
+                          @ssh_info[:host],
+                          @ssh_info[:username],
                           source_files,
                           target_files,
                           :recursive => true,
-                          :ssh => {:port => ssh_info[:port], :keys => ssh_info[:private_key_path]}
+                          :ssh => {:port => @ssh_info[:port], :keys => @ssh_info[:private_key_path]}
           end
         end
 
@@ -55,11 +55,19 @@ module VagrantPlugins
         end
 
         def source_files
-          @file_1.split(':').last
+          format_file_path(@file_1)
         end
 
         def target_files
-          @file_2.split(':').last
+          format_file_path(@file_2)
+        end
+
+        def format_file_path(filepath)
+          if @file_1.include?(':')
+            filepath.split(':').last.gsub("~", "/home/#{@ssh_info[:username]}")
+          else
+            filepath
+          end
         end
 
       end
