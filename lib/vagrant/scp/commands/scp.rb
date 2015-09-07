@@ -11,30 +11,13 @@ module VagrantPlugins
         end
 
         def execute
-          # Parse the arguments
-          file_1, file_2 = parse_args()
-          return if file_2.nil?
-          # Extract host info
-          # We want to get the name of the vm, from a [host_1]:file_1 [host_2]:file_2 description
-          host = [file_1, file_2].map{|file_spec| file_spec.match(/^([^:]*):/)[1] rescue nil}.compact.first
-          # The default machine name for Vagrant is 'default'
-          host = 'default' if (host.nil? || host == 0 )
+          @file_1, @file_2 = parse_args()
+          return if @file_2.nil?
 
-          # Get the info about the target VM
           with_target_vms(host) do |machine|
             ssh_info = machine.ssh_info
             raise Vagrant::Errors::SSHNotReady if ssh_info.nil?
-            if file_1.include? ':'
-              source_files = file_1.split(':').last
-              target_files = file_2
-              net_ssh_command = :download!
-            else
-              source_files = file_1
-              target_files = file_2.split(':').last
-              net_ssh_command = :upload!
-            end
 
-            # Run the SCP
             Net::SCP.send net_ssh_command,
                           ssh_info[:host],
                           ssh_info[:username],
@@ -44,6 +27,8 @@ module VagrantPlugins
                           :ssh => {:port => ssh_info[:port], :keys => ssh_info[:private_key_path]}
           end
         end
+
+        private
 
         def parse_args
           opts = OptionParser.new do |o|
@@ -57,6 +42,24 @@ module VagrantPlugins
           return argv if argv and  argv.length == 2
           @env.ui.info(opts.help, prefix: false) if argv
           return nil, nil
+        end
+
+        def host
+          host = [@file_1, @file_2].map{|file_spec| file_spec.match(/^([^:]*):/)[1] rescue nil}.compact.first
+          host = 'default' if (host.nil? || host == 0 )
+          host
+        end
+
+        def net_ssh_command
+          @file_1.include?(':') ? :download! : :upload!
+        end
+
+        def source_files
+          @file_1.split(':').last
+        end
+
+        def target_files
+          @file_2.split(':').last
         end
 
       end
