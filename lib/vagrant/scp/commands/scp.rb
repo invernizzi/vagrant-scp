@@ -46,7 +46,7 @@ module VagrantPlugins
 
         def host
           host = [@file_1, @file_2].map{|file_spec| file_spec.match(/^([^:]*):/)[1] rescue nil}.compact.first
-          host = 'default' if (host.nil? || host == 0 )
+          host = nil if (host.nil? || host == 0 )
           host
         end
 
