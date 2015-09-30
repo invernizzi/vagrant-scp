@@ -63,7 +63,7 @@ module VagrantPlugins
         end
 
         def format_file_path(filepath)
-          if @file_1.include?(':')
+          if filepath.include?(':')
             filepath.split(':').last.gsub("~", "/home/#{@ssh_info[:username]}")
           else
             filepath
