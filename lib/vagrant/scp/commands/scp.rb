@@ -17,14 +17,25 @@ module VagrantPlugins
           with_target_vms(host) do |machine|
             @ssh_info = machine.ssh_info
             raise Vagrant::Errors::SSHNotReady if @ssh_info.nil?
-
-            Net::SCP.send net_ssh_command,
-                          @ssh_info[:host],
-                          @ssh_info[:username],
-                          source_files,
-                          target_files,
-                          :recursive => true,
-                          :ssh => {:port => @ssh_info[:port], :keys => @ssh_info[:private_key_path]}
+            current_file = nil
+            Net::SCP.send(
+              net_ssh_command,
+              @ssh_info[:host],
+              @ssh_info[:username],
+              source_files,
+              target_files,
+              :recursive => true,
+              :verbose => true,
+              :ssh => {
+                :port => @ssh_info[:port],
+                :keys => @ssh_info[:private_key_path],
+                :verbose => 2}
+            ) do |_, name, sent, total|
+              message = "\r#{name}: #{(sent*100.0/total).round(3)}%"
+              message = "\n{message}" unless current_file == name
+              STDOUT.write message
+              current_file = name
+            end
           end
         end
 
