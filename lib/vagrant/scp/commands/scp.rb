@@ -25,7 +25,6 @@ module VagrantPlugins
               source_files,
               target_files,
               :recursive => true,
-              :verbose => true,
               :ssh => {
                 :port => @ssh_info[:port],
                 :keys => @ssh_info[:private_key_path],
