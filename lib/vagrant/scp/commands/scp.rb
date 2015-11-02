@@ -1,4 +1,3 @@
-require 'net/scp'
 
 module VagrantPlugins
   module Scp
@@ -17,24 +16,25 @@ module VagrantPlugins
           with_target_vms(host) do |machine|
             @ssh_info = machine.ssh_info
             raise Vagrant::Errors::SSHNotReady if @ssh_info.nil?
-            current_file = nil
-            Net::SCP.send(
-              net_ssh_command,
-              @ssh_info[:host],
-              @ssh_info[:username],
-              source_files,
-              target_files,
-              :recursive => true,
-              :ssh => {
-                :port => @ssh_info[:port],
-                :keys => @ssh_info[:private_key_path],
-                :verbose => 2}
-            ) do |_, name, sent, total|
-              message = "\r#{name}: #{(sent*100.0/total).round(3)}%"
-              message = "\n{message}" unless current_file == name
-              STDOUT.write message
-              current_file = name
+            user_at_host = "#{@ssh_info[:username]}@#{@ssh_info[:host]}"
+            if net_ssh_command == :upload!
+              target = "#{user_at_host}:#{target_files}"
+              source = source_files
+            else
+              target = target_files
+              source = "#{user_at_host}:#{source_files}"
             end
+            command = [
+              "scp",
+              "-r",
+              "-o StrictHostKeyChecking=no",
+              "-o UserKnownHostsFile=/dev/null",
+              "-o port=#{@ssh_info[:port]}",
+              "-i '#{@ssh_info[:private_key_path][0]}'",
+              source,
+              target
+            ].join(' ')
+            system(command)
           end
         end
 
