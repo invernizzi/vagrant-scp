@@ -18,11 +18,11 @@ module VagrantPlugins
             raise Vagrant::Errors::SSHNotReady if @ssh_info.nil?
             user_at_host = "#{@ssh_info[:username]}@#{@ssh_info[:host]}"
             if net_ssh_command == :upload!
-              target = "#{user_at_host}:#{target_files}"
-              source = source_files
+              target = "#{user_at_host}:'#{target_files}'"
+              source = "'#{source_files}'"
             else
-              target = target_files
-              source = "#{user_at_host}:#{source_files}"
+              target = "'#{target_files}'"
+              source = "#{user_at_host}:'#{source_files}'"
             end
             command = [
               "scp",
