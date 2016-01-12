@@ -24,12 +24,20 @@ module VagrantPlugins
               target = "'#{target_files}'"
               source = "#{user_at_host}:'#{source_files}'"
             end
+
+            if @ssh_info[:proxy_command]
+              proxy_command = "-o ProxyCommand='#{@ssh_info[:proxy_command]}'"
+            else
+              proxy_command = ''
+            end
+
             command = [
               "scp",
               "-r",
               "-o StrictHostKeyChecking=no",
               "-o UserKnownHostsFile=/dev/null",
               "-o port=#{@ssh_info[:port]}",
+              proxy_command,
               "-i '#{@ssh_info[:private_key_path][0]}'",
               source,
               target
