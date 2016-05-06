@@ -34,6 +34,7 @@ module VagrantPlugins
             command = [
               "scp",
               "-r",
+              "-o IdentitiesOnly=yes",
               "-o StrictHostKeyChecking=no",
               "-o UserKnownHostsFile=/dev/null",
               "-o port=#{@ssh_info[:port]}",
