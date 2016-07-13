@@ -9,41 +9,32 @@ module VagrantPlugins
           "copies data into a box via SCP"
         end
 
-        def execute
-          @file_1, @file_2 = parse_args()
-          return if @file_2.nil?
-
-          with_target_vms(host) do |machine|
-            @ssh_info = machine.ssh_info
-            raise Vagrant::Errors::SSHNotReady if @ssh_info.nil?
-            user_at_host = "#{@ssh_info[:username]}@#{@ssh_info[:host]}"
-            if net_ssh_command == :upload!
-              target = "#{user_at_host}:'#{target_files}'"
-              source = "'#{source_files}'"
-            else
-              target = "'#{target_files}'"
-              source = "#{user_at_host}:'#{source_files}'"
-            end
-
-            if @ssh_info[:proxy_command]
-              proxy_command = "-o ProxyCommand='#{@ssh_info[:proxy_command]}'"
-            else
-              proxy_command = ''
-            end
-
-            command = [
-              "scp",
-              "-r",
-              "-o StrictHostKeyChecking=no",
-              "-o UserKnownHostsFile=/dev/null",
-              "-o port=#{@ssh_info[:port]}",
-              proxy_command,
-              "-i '#{@ssh_info[:private_key_path][0]}'",
-              source,
-              target
-            ].join(' ')
-            system(command)
+        Pathspec = Struct.new(:host, :path) do 
+          def self.parse(spec)
+            host, path = spec.match(/^([^:\/]*):(.*)/)[1..2] rescue nil
+            host, path = nil, spec if (host.nil? || host == '' || host == 0 )
+            return Pathspec.new(host, path)
           end
+        end
+
+        def execute
+          pathspecs = parse_args()
+          return if pathspecs.empty?
+
+          pathspecs.map!{|s| Pathspec.parse(s)}
+
+          @ssh_info = {}
+          with_target_vms(pathspecs.map{|s| s.host}.compact) do |machine|
+            raise Vagrant::Errors::SSHNotReady if machine.ssh_info.nil?
+            @ssh_info[machine.name.to_s] = machine.ssh_info
+          end
+
+          command = [
+              "scp", "-r", "-3",
+              "-o", "StrictHostKeyChecking=no",
+              "-o", "UserKnownHostsFile=/dev/null",
+            ] + pathspecs.map{|s| scp_command_from_vm_pathspec(s)}.flatten
+          system(*command)
         end
 
         private
@@ -57,39 +48,26 @@ module VagrantPlugins
             o.separator ""
           end
           argv = parse_options(opts)
-          return argv if argv and  argv.length == 2
+          return argv if argv
           @env.ui.info(opts.help, prefix: false) if argv
-          return nil, nil
+          return []
         end
 
-        def host
-          host = [@file_1, @file_2].map{|file_spec| file_spec.match(/^([^:]*):/)[1] rescue nil}.compact.first
-          host = nil if (host.nil? || host == '' || host == 0 )
-          host
-        end
-
-        def net_ssh_command
-          @file_1.include?(':') ? :download! : :upload!
-        end
-
-        def source_files
-          format_file_path(@file_1)
-        end
-
-        def target_files
-          format_file_path(@file_2)
-        end
-
-        def format_file_path(filepath)
-          if filepath.include?(':')
-            filepath.split(':').last.gsub("~", "/home/#{@ssh_info[:username]}")
+        def scp_command_from_vm_pathspec(spec)
+          if spec.host and @ssh_info.has_key?(spec.host)
+            ssh_info = @ssh_info[spec.host]
+            command = ["-i", ssh_info[:private_key_path][0]]
+            command << "-o" << "ProxyCommand=#{ssh_info[:proxy_command]}" if ssh_info[:proxy_command]
+            command << "-P" << "#{ssh_info[:port]}" if ssh_info[:port]
+            command << "#{ssh_info[:username]}@#{ssh_info[:host]}:#{spec.path}"
+            return command
           else
-            filepath
+            return [spec.host.nil? ? spec.path : spec.host + ':' + spec.path]
           end
         end
-
       end
 
     end
   end
 end
+
