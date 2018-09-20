@@ -22,7 +22,8 @@ Copying files out of the VM works in the same fashion
 
     vagrant scp [vm_name]:<somewhere_on_the_vm> <some_local_file_or_dir>
 
-That’s it!
+If source is a directory it will be copied recursively.
+
 
 ## Examples
 
