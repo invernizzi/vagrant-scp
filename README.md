@@ -36,4 +36,4 @@ And from the VM like this
     vagrant scp :file_on_vm.txt file_on_host.txt
 
 ## Vagrant version
-We support Vagrant 1.7+. Note that Ubuntu 14.04 LTS ships version 1.4.3. You can get the deb file with the latest Vagrant [here](https://www.vagrantup.com/).
+We require Vagrant v1.7 or newer. If you are running older version (check with `vagrant --version`), install recent version directly from [vendor site](https://www.vagrantup.com/).
