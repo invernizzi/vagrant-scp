@@ -1,3 +1,4 @@
+require 'pathname'
 
 module VagrantPlugins
   module Scp
@@ -78,7 +79,11 @@ module VagrantPlugins
         end
 
         def target_files
-          format_file_path(@file_2)
+          if target_location_specified?
+            format_file_path(@file_2)
+          else
+            Pathname.new(source_files).basename
+          end
         end
 
         def format_file_path(filepath)
@@ -89,6 +94,9 @@ module VagrantPlugins
           end
         end
 
+        def target_location_specified?
+          !@file_2.end_with?(':')
+        end
       end
 
     end
