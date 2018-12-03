@@ -38,7 +38,7 @@ module VagrantPlugins
               "-o UserKnownHostsFile=/dev/null",
               "-o port=#{@ssh_info[:port]}",
               proxy_command,
-              "-i '#{@ssh_info[:private_key_path][0]}'",
+              @ssh_info[:private_key_path].map { |k| "-i '#{k}'" }.join(" "),
               source,
               target
             ].join(' ')
