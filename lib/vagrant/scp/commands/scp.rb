@@ -1,4 +1,5 @@
 require 'pathname'
+require 'resolv'
 
 module VagrantPlugins
   module Scp
@@ -17,7 +18,12 @@ module VagrantPlugins
           with_target_vms(host) do |machine|
             @ssh_info = machine.ssh_info
             raise Vagrant::Errors::SSHNotReady if @ssh_info.nil?
-            user_at_host = "#{@ssh_info[:username]}@#{@ssh_info[:host]}"
+            case @ssh_info[:host]
+            when Resolv::IPv6::Regex
+              user_at_host = "#{@ssh_info[:username]}@[#{@ssh_info[:host]}]"
+            else
+              user_at_host = "#{@ssh_info[:username]}@#{@ssh_info[:host]}"
+            end
             if net_ssh_command == :upload!
               target = "#{user_at_host}:'#{target_files}'"
               source = "'#{source_files}'"
