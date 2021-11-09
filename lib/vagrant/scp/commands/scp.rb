@@ -40,6 +40,7 @@ module VagrantPlugins
               "-o port=#{@ssh_info[:port]}",
               proxy_command,
               "-i '#{@ssh_info[:private_key_path][0]}'",
+              "-o IdentitiesOnly=yes",
               source,
               target
             ].join(' ')
