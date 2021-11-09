@@ -32,12 +32,19 @@ module VagrantPlugins
               proxy_command = ''
             end
 
+            if @ssh_info[:keys_only]
+              keys_only = "-o IdentitiesOnly=yes"
+            else
+              keys_only = ''
+            end
+
             command = [
               "scp",
               "-r",
               "-o StrictHostKeyChecking=no",
               "-o UserKnownHostsFile=/dev/null",
               "-o port=#{@ssh_info[:port]}",
+              keys_only,
               proxy_command,
               "-i '#{@ssh_info[:private_key_path][0]}'",
               source,
