@@ -32,9 +32,16 @@ module VagrantPlugins
               proxy_command = ''
             end
 
+            if @ssh_info[:config]
+              ssh_config = "-F #{@ssh_info[:config]}"
+            else
+              ssh_config = ''
+            end
+
             command = [
               "scp",
               "-r",
+              ssh_config,
               "-o StrictHostKeyChecking=no",
               "-o UserKnownHostsFile=/dev/null",
               "-o port=#{@ssh_info[:port]}",
